@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/movie_detail_view"
+    android:background="#000000">
+
+
+    <ImageView
+        android:layout_width="154dp"
+        android:layout_height="231dp"
+        android:id="@+id/detail_poster"
+        android:layout_centerHorizontal="true"
+        android:minWidth="285dp"
+        android:padding="1dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="TITLE"
+        android:id="@+id/detail_title"
+        android:layout_below="@+id/detail_poster"
+        android:layout_centerHorizontal="true"
+        android:padding="1dp"
+        android:textColor="#ffffff" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="RATING"
+        android:id="@+id/detail_rating"
+        android:layout_below="@+id/detail_title"
+        android:layout_centerHorizontal="true"
+        android:padding="1dp"
+        android:textColor="#ffffff" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="OVERVIEW"
+        android:id="@+id/detail_plot"
+        android:layout_below="@+id/detail_rating"
+        android:layout_centerHorizontal="true"
+        android:padding="1dp"
+        android:textColor="#ffffff" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="RELEASE DATE"
+        android:id="@+id/detail_release_date"
+        android:layout_below="@+id/detail_plot"
+        android:layout_centerHorizontal="true"
+        android:padding="1dp"
+        android:textColor="#ffffff" />
+</RelativeLayout>

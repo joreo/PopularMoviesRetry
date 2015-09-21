@@ -1,0 +1,15 @@
+<resources>
+    <string name="action_settings">Settings</string>
+    <string name="app_name">Popular Movies</string>
+
+    <string name="pref_sort_label">Sort by</string>
+    <string name="pref_units_label_popular">Most Popular</string>
+    <string name="pref_units_label_rating">Highest Rating</string>
+
+
+    <string name="pref_sort_key" translatable="false">sort by</string>
+    <string name="pref_sort_popular">Popular</string>
+
+    <string name="pref_popular">Popular</string>
+    <string name="pref_rating">Rating</string>
+</resources>
