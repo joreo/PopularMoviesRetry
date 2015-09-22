@@ -8,6 +8,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +26,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PostersFragment extends Fragment {
@@ -33,7 +34,7 @@ public class PostersFragment extends Fragment {
     //an array of movie objects
     Movies[] movies = new Movies[20];
 
-    public ArrayList<String> movieList = new ArrayList<String>();
+    //public ArrayList<String> movieList = new ArrayList<String>();
 
     public PostersFragment() {
     }
@@ -48,39 +49,35 @@ public class PostersFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Log.v("Steps", "Called updateMovies() onOptionsItemSelected");
             updateMovies();
+            mPosterAdapter.notifyDataSetChanged(); // doesn't seem to update my movielist w/o a rotate
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        //return super.onOptionsItemSelected(item);
+        return false;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-//        updateMovies();
-//        Log.v("Steps", "Called updateMovies() onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-//        GridView gridView = (GridView) rootView.findViewById(R.id.gridview_posters);
-
-        //i thought with updateMovies(); here, the movieList would be populated, but nope
-
-//        gridView.setAdapter(mPosterAdapter);
-
         return rootView;
     }
 
-
-
     private void updateMovies() {
-        Log.v("Steps", "in the updateMovies method");
-        Log.v("@@@ fetchmovie called?:", "if you see this, yes.");
         FetchMovieInfo movieInfo = new FetchMovieInfo();
         movieInfo.execute();
     }
@@ -90,8 +87,6 @@ public class PostersFragment extends Fragment {
         super.onStart();
 
     }
-
-
 
     public class FetchMovieInfo extends AsyncTask<String, Void, String[]> {
 
@@ -107,6 +102,7 @@ public class PostersFragment extends Fragment {
             final String TMB_VOTE_AVG = "vote_average";
             final String TMB_OVERVIEW = "overview";
             final String TMB_RELEASE_DATE = "release_date";
+            final String TMB_POPULARITY = "popularity";
 
             JSONObject moviesJson = new JSONObject(movieQueryJsonStr);
             JSONArray moviesArray = moviesJson.getJSONArray(TMB_RESULTS);
@@ -123,6 +119,7 @@ public class PostersFragment extends Fragment {
                 String average;
                 String overview;
                 String release_date;
+                String popularity;
 
                 JSONObject movieDetail = moviesArray.getJSONObject(i);
 
@@ -131,13 +128,14 @@ public class PostersFragment extends Fragment {
                 release_date = movieDetail.getString(TMB_RELEASE_DATE);
                 average = movieDetail.getString(TMB_VOTE_AVG);
                 overview = movieDetail.getString(TMB_OVERVIEW);
+                popularity = movieDetail.getString(TMB_POPULARITY);
 
                 resultStrs[i] = poster;
                 //adding the movie info into our movie objects.
-                movies[i] = new Movies (poster, title, average, overview, release_date);
+                movies[i] = new Movies (poster, title, average, overview, release_date, popularity);
 
-                movieList.add(poster);
             }
+
 
             return resultStrs;
 
@@ -151,23 +149,7 @@ public class PostersFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
-            //sort order uses whatever is selected from the prefs.
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String unitType = sharedPrefs.getString(
-                    getString(R.string.pref_sort_key),
-                    getString(R.string.pref_rating));
-//            Log.v(LOG_TAG, unitType.toString());
 
-            String sortMethod = "popularity.desc";
-            if (unitType.equals("Rating")){
-                sortMethod = "vote_average.desc";
-                Log.v("### in the if", unitType.toString());
-                Log.v("## in the if", sortMethod);
-            } else {
-                Log.v("### in the else", unitType.toString());
-                Log.v("### in the else", sortMethod);
-            }
 
             // Will contain the raw JSON response as a string.
             String postersJsonStr = null;
@@ -177,8 +159,8 @@ public class PostersFragment extends Fragment {
                 //*************API KEY GOES UNDER HERE****************
                 //****************************************************
                 final String TMDB_BASE_URL =
-                        "http://api.themoviedb.org/3/discover/movie?sort_by="+ sortMethod +"&api_key=xxxx";
-                Log.v(LOG_TAG, sortMethod);
+                        "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=XXXXX";
+
                 URL url = new URL(TMDB_BASE_URL.toString());
 
 
@@ -234,21 +216,31 @@ public class PostersFragment extends Fragment {
         protected void onPostExecute(String[] result) {
             //just noting my concern that this only works when i code it here and not
             //on create view
-            //mPosterAdapter = new ImageAdapter(getActivity(), movies);
+
             mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
 
             GridView gridView = (GridView) getView().findViewById(R.id.gridview_posters);
+
+            //sort movie objects, we hope
+            SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String unitType = sharedPrefs.getString(
+                    getString(R.string.pref_sort_key),
+                    getString(R.string.pref_rating));
+
+            if (unitType.equals("Rating")){
+                Arrays.sort(movies, Movies.MovieRatingComparator);
+            } else {
+                //sort by pop
+                Arrays.sort(movies, Movies.MoviePopularityComparator);
+            }
+
             gridView.setAdapter(mPosterAdapter);
 
             gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    //toast test that shows image path
-                    //later this will be an object with the info we need
-//                    String msg = mPosterAdapter.getItem(i).toString();
-//                    Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
-                    //pseudo code for my new intent
-                   // MovieData movieData = mPosterAdapter.getItem(i);
+
                     Movies movies = mPosterAdapter.getItem(i);
                     Bundle extras = new Bundle();
                     extras.putString("MOVIE_POSTER", movies.poster);
