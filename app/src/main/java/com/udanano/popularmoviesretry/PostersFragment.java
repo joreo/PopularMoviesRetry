@@ -40,6 +40,12 @@ public class PostersFragment extends Fragment {
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+        updateMovies();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
