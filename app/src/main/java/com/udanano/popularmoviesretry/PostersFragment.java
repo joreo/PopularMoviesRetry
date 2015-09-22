@@ -165,7 +165,7 @@ public class PostersFragment extends Fragment {
                 //*************API KEY GOES UNDER HERE****************
                 //****************************************************
                 final String TMDB_BASE_URL =
-                        "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=XXXXX";
+                        "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=xxxxx";
 
                 URL url = new URL(TMDB_BASE_URL.toString());
 
