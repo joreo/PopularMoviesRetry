@@ -23,26 +23,7 @@ public ImageAdapter(Activity context, List<Movies> data) {
     super(context, 0, data);
     this.mContext = context;
 
-//    myPosters = new String[data.size()];
-  //  data.toArray(myPosters);
-//    Log.v("Steps", "turning the arraylist to array in imgadapter");
-//    Log.v("@@@ImgAdapt size:", String.valueOf(myPosters.length));
-    }
-
-
-//    public int getCount() {
-//        //return mThumbIds.length;
-//        //or myPosters size if i can get it to be not null
-//        Log.v("@@@getCount size:", String.valueOf(myPosters.length));
-//        return myPosters.length;
-//    }
-//
-//    @Override
-//    public long getItemId(int position) {
-//
-//        return 0;
-//    }
-
+}
     // create a new ImageView for each item referenced by the Adapter
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

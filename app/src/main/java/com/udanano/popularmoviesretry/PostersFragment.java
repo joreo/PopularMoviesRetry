@@ -160,7 +160,7 @@ public class PostersFragment extends Fragment {
             // Will contain the raw JSON response as a string.
             String postersJsonStr = null;
             try {
-                //I know I can break this down more, but I just want it to work first
+
                 //****************************************************
                 //*************API KEY GOES UNDER HERE****************
                 //****************************************************
