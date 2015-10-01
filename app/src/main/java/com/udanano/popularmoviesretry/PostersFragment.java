@@ -2,6 +2,7 @@ package com.udanano.popularmoviesretry;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,15 +28,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PostersFragment extends Fragment {
     private ImageAdapter mPosterAdapter;
 
+    //****************************************************
+    //*************API KEY GOES UNDER HERE****************
+    //****************************************************
+    final public String API_KEY = "*****";
+
     //an array of movie objects
     Movies[] movies = new Movies[20];
-
-    //public ArrayList<String> movieList = new ArrayList<String>();
 
     public PostersFragment() {
     }
@@ -109,6 +116,8 @@ public class PostersFragment extends Fragment {
             final String TMB_OVERVIEW = "overview";
             final String TMB_RELEASE_DATE = "release_date";
             final String TMB_POPULARITY = "popularity";
+            //added for stage 2
+            final String TMB_ID = "id";
 
             JSONObject moviesJson = new JSONObject(movieQueryJsonStr);
             JSONArray moviesArray = moviesJson.getJSONArray(TMB_RESULTS);
@@ -126,6 +135,7 @@ public class PostersFragment extends Fragment {
                 String overview;
                 String release_date;
                 String popularity;
+                String id;
 
                 JSONObject movieDetail = moviesArray.getJSONObject(i);
 
@@ -135,10 +145,11 @@ public class PostersFragment extends Fragment {
                 average = movieDetail.getString(TMB_VOTE_AVG);
                 overview = movieDetail.getString(TMB_OVERVIEW);
                 popularity = movieDetail.getString(TMB_POPULARITY);
+                id = movieDetail.getString(TMB_ID);
 
                 resultStrs[i] = poster;
                 //adding the movie info into our movie objects.
-                movies[i] = new Movies (poster, title, average, overview, release_date, popularity);
+                movies[i] = new Movies (poster, title, average, overview, release_date, popularity, id);
 
             }
 
@@ -149,6 +160,11 @@ public class PostersFragment extends Fragment {
 
         @Override
         protected String[] doInBackground(String... params) {
+
+            if (params.length == 0) {
+
+                //don't do anything yet, may not be useful
+            }
 
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
@@ -161,11 +177,10 @@ public class PostersFragment extends Fragment {
             String postersJsonStr = null;
             try {
 
-                //****************************************************
-                //*************API KEY GOES UNDER HERE****************
-                //****************************************************
+
+
                 final String TMDB_BASE_URL =
-                        "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=xxxxx";
+                        "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=" + API_KEY;
 
                 URL url = new URL(TMDB_BASE_URL.toString());
 
@@ -223,7 +238,8 @@ public class PostersFragment extends Fragment {
             //just noting my concern that this only works when i code it here and not
             //on create view
 
-            mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+            //mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+            //moved below
 
             GridView gridView = (GridView) getView().findViewById(R.id.gridview_posters);
 
@@ -234,11 +250,45 @@ public class PostersFragment extends Fragment {
                     getString(R.string.pref_sort_key),
                     getString(R.string.pref_rating));
 
+            Log.e("Favorite test", unitType);
             if (unitType.equals("Rating")){
                 Arrays.sort(movies, Movies.MovieRatingComparator);
+                mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+            } else if (unitType.equals("Favorites")) {
+                    //should be Favorites, changed temporarily
+
+                DatabaseOps DOP = new DatabaseOps(getActivity());
+                Cursor CR = DOP.getEntry(DOP);
+
+                //I don't know how to display an empty adapter
+                //so let's show something else
+                int cursorCount = CR.getCount();
+                if(cursorCount != 0){
+                    CR.moveToFirst();
+                    List<Movies> favMovies = new ArrayList<Movies>();
+                    do{
+                     favMovies.add(new Movies(
+                            CR.getString(0),
+                            CR.getString(1),
+                            CR.getString(2),
+                            CR.getString(3),
+                            CR.getString(4),
+                            CR.getString(5),
+                            CR.getString(6)));
+
+                 }while(CR.moveToNext());
+                    mPosterAdapter = new ImageAdapter(getActivity(), favMovies);
+                }else{
+                    Toast.makeText(getActivity(), "Favorites are empty, showing Popular movies", Toast.LENGTH_LONG).show();
+                    Arrays.sort(movies, Movies.MoviePopularityComparator);
+                    mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+                }
+                DOP.close();
             } else {
                 //sort by pop
                 Arrays.sort(movies, Movies.MoviePopularityComparator);
+                mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+
             }
 
             gridView.setAdapter(mPosterAdapter);
@@ -254,6 +304,9 @@ public class PostersFragment extends Fragment {
                     extras.putString("MOVIE_RATING", movies.average);
                     extras.putString("MOVIE_PLOT", movies.overview);
                     extras.putString("MOVIE_RELEASE_DATE", movies.release_date);
+                    extras.putString("API_KEY", API_KEY);
+                    extras.putString("MOVIE_ID", movies.id);
+                    extras.putString("MOVIE_POP", movies.popularity);
                     Intent intent = new Intent(getActivity(), MovieDetail.class)
                             .putExtras(extras);
                     startActivity(intent);

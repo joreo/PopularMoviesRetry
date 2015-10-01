@@ -10,8 +10,9 @@ public class Movies implements Comparable <Movies> {
     String overview;
     String release_date;
     String popularity;
+    String id;
 //default stuff
-    public Movies(String vPoster, String vTitle, String vAverage, String vOverview, String vRelease_date, String vPopularity)
+    public Movies(String vPoster, String vTitle, String vAverage, String vOverview, String vRelease_date, String vPopularity, String vId)
     {
         this.poster = vPoster;
         this.title = vTitle;
@@ -19,6 +20,7 @@ public class Movies implements Comparable <Movies> {
         this.overview = vOverview;
         this.release_date = vRelease_date;
         this.popularity = vPopularity;
+        this.id = vId;
     }
 
     public String getPopularity(){

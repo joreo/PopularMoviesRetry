@@ -12,14 +12,12 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class ImageAdapter extends ArrayAdapter<Movies> {
-    // change this to ArrayAdapter<Movies> so it accepts objects of Movies type
-    //maybe rename this to MovieAdapter since it's going to do more than movies maybe, idk yet
 
     private Context mContext;
     public static String[] myPosters;
 
 public ImageAdapter(Activity context, List<Movies> data) {
-    //super(context, R.layout.fragment_main, data);
+
     super(context, 0, data);
     this.mContext = context;
 
