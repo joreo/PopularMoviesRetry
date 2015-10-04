@@ -17,14 +17,28 @@ public class MainActivity extends ActionBarActivity {
         //added if to try and get layout-large to work
         //also this view statement
 
-        View v = findViewById(R.id.container);
+        View v = findViewById(R.id.two_panels);
+        // is this layout large?
         if(v == null){
+            //nope
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        //R.id.poster_frag
+                        // new MovieDetail.DetailFragment() --- details panel
+                        // new PostersFragment() -- posters
+                        .add(R.id.container, new PostersFragment())
+                        .commit();
+            }
 
         }else {
 
             if (savedInstanceState == null) {
+                //yup
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.container, new PostersFragment())
+                        //R.id.poster_frag
+                        // new MovieDetail.DetailFragment() --- details panel
+                        // new PostersFragment() -- posters
+                        .add(R.id.container, new MovieDetail.DetailFragment())
                         .commit();
             }
         }

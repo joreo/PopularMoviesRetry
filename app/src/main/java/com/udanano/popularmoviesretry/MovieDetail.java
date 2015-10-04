@@ -36,9 +36,22 @@ import java.util.List;
 
 public class MovieDetail extends ActionBarActivity {
 
-    public static String[] trailerCode = new String[8];
+    public static String[] trailerCode = new String[15];
     public static List<String> reviews = new ArrayList<String>();
     public static int reviewLength;
+    public static boolean falseData = false;
+    public static String poster;
+    public static String title;
+    public static String rating;
+    public static String plot;
+    public static String release_date;
+
+    public static String popularity;
+
+    //also used in some of the other functions
+    //public static String movie_id ;
+    //public static String API_KEY = "fcece545ee341e673a9344a531f80064";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +71,11 @@ public class MovieDetail extends ActionBarActivity {
         //scrollview problems - boom
         //add reviews - boom
         //fav button
+        //worked fine with just phone. issues making the double panel for tablets including:
+        //      crash w/o default data
+        //      can't get my variables to stay alive after the if
+        //      i'm bad at fragments/frames. learn2fragmentpls
+        //      click a thing - watch it take over the whole screen. good job, dumbass.
     }
 
     public static class DetailFragment extends Fragment {
@@ -69,9 +87,15 @@ public class MovieDetail extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-            FetchTrailer trailer = new FetchTrailer();
-            trailer.execute();
+            Intent intent = getActivity().getIntent();
+            Bundle extras = intent.getExtras();
 
+
+            if (intent.hasExtra("MOVIE_POSTER")) {
+                //stop making API calls if all I did was open the app.
+                FetchTrailer trailer = new FetchTrailer();
+                trailer.execute();
+            }
             mTrailerAdapter =
                     new ArrayAdapter<String>(
                             getActivity(),
@@ -84,110 +108,131 @@ public class MovieDetail extends ActionBarActivity {
 
             View rootView = inflater.inflate(R.layout.detail_main, container, false);
 
-            Intent intent = getActivity().getIntent();
-            Bundle extras = intent.getExtras();
 
-            final String poster = extras.getString("MOVIE_POSTER");
-            final String title = extras.getString("MOVIE_TITLE");
-            final String rating = extras.getString("MOVIE_RATING");
-            final String plot = extras.getString("MOVIE_PLOT");
-            final String release_date = extras.getString("MOVIE_RELEASE_DATE");
-            final String movie_id = extras.getString("MOVIE_ID");
-            final String popularity = extras.getString("MOVIE_POP");
 
-            ((TextView)rootView.findViewById(R.id.detail_title)).setText(title);
-            ((TextView)rootView.findViewById(R.id.detail_rating)).setText("Rating: " + rating);
-            ((TextView)rootView.findViewById(R.id.detail_plot)).setText(plot);
-            ((TextView)rootView.findViewById(R.id.detail_release_date)).setText("Released: " + release_date);
 
-            String DB_base_Url = "http://image.tmdb.org/t/p/w185/";
-            String builtUri = DB_base_Url += poster;
+            //Setup this way to handle non-set extras
+            final String poster = intent.getStringExtra("MOVIE_POSTER");
+            final String title = intent.getStringExtra("MOVIE_TITLE");
+            final String rating = intent.getStringExtra("MOVIE_RATING");
+            final String plot = intent.getStringExtra("MOVIE_PLOT");
+            final String release_date = intent.getStringExtra("MOVIE_RELEASE_DATE");
+            final String movie_id = intent.getStringExtra("MOVIE_ID");
+            final String popularity = intent.getStringExtra("MOVIE_POP");
 
-            Picasso.with(getActivity())
-                    .load(builtUri)
-                    .into((ImageView) rootView.findViewById(R.id.detail_poster));
+            final Button favoriteButton = (Button) rootView.findViewById(R.id.favoriteButton);
+
+
+            if (!intent.hasExtra("API_KEY")) {
+                Picasso.with(getActivity())
+                        .load("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
+                        .into((ImageView) rootView.findViewById(R.id.detail_poster));
+                ((TextView) rootView.findViewById(R.id.detail_title)).setText("Welcome!");
+                ((TextView) rootView.findViewById(R.id.detail_rating)).setText("This is default data!");
+                ((TextView) rootView.findViewById(R.id.detail_plot)).setText("Click something to get started");
+                ((TextView) rootView.findViewById(R.id.detail_release_date)).setText(":)");
+                favoriteButton.setEnabled(false);
+                Log.e("hasExtra", "false");
+            } else {
+                ((TextView) rootView.findViewById(R.id.detail_title)).setText(title);
+                ((TextView) rootView.findViewById(R.id.detail_rating)).setText("Rating: " + rating);
+                ((TextView) rootView.findViewById(R.id.detail_plot)).setText(plot);
+                ((TextView) rootView.findViewById(R.id.detail_release_date)).setText("Released: " + release_date);
+                favoriteButton.setEnabled(true);
+                Log.e("hasExtra", "true");
+
+
+                String DB_base_Url = "http://image.tmdb.org/t/p/w185/";
+                String builtUri = DB_base_Url += poster;
+
+                Picasso.with(getActivity())
+                        .load(builtUri)
+                        .into((ImageView) rootView.findViewById(R.id.detail_poster));
+            }
 
             ListView listView = (ListView) rootView.findViewById(R.id.listview_trailers);
-
-
             //favorite button
-            final Button favoriteButton = (Button) rootView.findViewById(R.id.favoriteButton);
+
             //search the db for the movie id
             //if it exists,
             //
-            DatabaseOps DB = new DatabaseOps(getActivity());
-            Cursor CR = DB.findEntry(DB, movie_id);
-            int cursorCount = CR.getCount();
-            String cursorString;
-            if(cursorCount != 0){
-                CR.moveToFirst();
-                cursorString = CR.getString(0);
-                do {
-                    if(movie_id.equals(cursorString)){
-                        favoriteButton.setText("Remove from Favorites");
-                    }
-                }while(CR.moveToNext());
+            if (intent.hasExtra("API_KEY")) {
+                DatabaseOps DB = new DatabaseOps(getActivity());
+                Cursor CR = DB.findEntry(DB, movie_id);
+                int cursorCount = CR.getCount();
+                String cursorString;
+                if (cursorCount != 0) {
+                    CR.moveToFirst();
+                    cursorString = CR.getString(0);
+                    do {
+                        if (movie_id.equals(cursorString)) {
+                            favoriteButton.setText("Remove from Favorites");
+                        }
+                    } while (CR.moveToNext());
+                }
+                DB.close();
             }
-            DB.close();
-
-
-            View.OnClickListener myHandler = new View.OnClickListener() {
-              public void onClick(View v){
-                  DatabaseOps DB = new DatabaseOps(getActivity());
-                  if(favoriteButton.getText().equals("Add to Favorites")){
-                      //add to favorites
-                      DB.addEntry(DB, poster, title, rating, plot, release_date, popularity, movie_id);
-                      Toast.makeText(getActivity(), "Added " + title + " to favorites.", Toast.LENGTH_LONG).show();
-                      //change button text
-                      favoriteButton.setText("Remove from Favorites");
-                  } else {
-                      //remove from favorites
-                      DB.deleteEntry(DB, movie_id);
-                      Toast.makeText(getActivity(), "Removed " + title + " from favorites.", Toast.LENGTH_LONG).show();
-                      //change button text
-                      favoriteButton.setText("Add to Favorites");
-                  }
-                  DB.close();
-              }
-            };
+            //i'm hoping this will keep trailers, reviews, and fave button from working with the initial dummy data load
+            //if(intent.hasExtra("API_KEY")) {
+                View.OnClickListener myHandler = new View.OnClickListener() {
+                    public void onClick(View v) {
+                        DatabaseOps DB = new DatabaseOps(getActivity());
+                        if (favoriteButton.getText().equals("Add to Favorites")) {
+                            //add to favorites
+                            DB.addEntry(DB, poster, title, rating, plot, release_date, popularity, movie_id);
+                            Toast.makeText(getActivity(), "Added " + title + " to favorites.", Toast.LENGTH_LONG).show();
+                            //change button text
+                            favoriteButton.setText("Remove from Favorites");
+                        } else {
+                            //remove from favorites
+                            DB.deleteEntry(DB, movie_id);
+                            Toast.makeText(getActivity(), "Removed " + title + " from favorites.", Toast.LENGTH_LONG).show();
+                            //change button text
+                            favoriteButton.setText("Add to Favorites");
+                        }
+                        DB.close();
+                    }
+                };
             favoriteButton.setOnClickListener(myHandler);
 
 
 
-            listView.setAdapter(mTrailerAdapter);
-            //reviews adapter setting
-            mReviewAdapter =
-                    new ArrayAdapter<String>(
-                            getActivity(),
-                            R.layout.list_item_reviews,
-                            R.id.list_item_review_textview,
-                            new ArrayList<String>()
-                    );
+                listView.setAdapter(mTrailerAdapter);
+                //reviews adapter setting
+                mReviewAdapter =
+                        new ArrayAdapter<String>(
+                                getActivity(),
+                                R.layout.list_item_reviews,
+                                R.id.list_item_review_textview,
+                                new ArrayList<String>()
+                        );
 
-            ListView reviewListView = (ListView) rootView.findViewById(R.id.listview_reviews);
-            reviewListView.setAdapter(mReviewAdapter);
+                ListView reviewListView = (ListView) rootView.findViewById(R.id.listview_reviews);
+                reviewListView.setAdapter(mReviewAdapter);
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                    String videoId = mTrailerAdapter.getItem(position);
-                    try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailerCode[position]));
-                    intent.putExtra("VIDEO_ID", trailerCode[position]);
-                        Log.e("@@@clicker", videoId + " " + trailerCode[position]);
-                    startActivity(intent);
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                        String videoId = mTrailerAdapter.getItem(position);
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + trailerCode[position]));
+                            intent.putExtra("VIDEO_ID", trailerCode[position]);
+                            Log.e("@@@clicker", videoId + " " + trailerCode[position]);
+                            startActivity(intent);
 
-                    } catch(Exception e) {
-                        //consider launching a browser via intent if the youtube app is missing
-                        String url = "http://youtu.be/" + trailerCode[position];
-                        Toast.makeText(getActivity(), "Consider installing the YouTube app to see " + url, Toast.LENGTH_LONG).show();
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        startActivity(i);
+                        } catch (Exception e) {
+                            //consider launching a browser via intent if the youtube app is missing
+                            String url = "http://youtu.be/" + trailerCode[position];
+                            Toast.makeText(getActivity(), "Consider installing the YouTube app to see " + url, Toast.LENGTH_LONG).show();
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            startActivity(i);
+                        }
                     }
-                }
-            });
+                });
+            //}
+            //end of if for dummy data
 
             return rootView;
 
@@ -266,11 +311,13 @@ public class MovieDetail extends ActionBarActivity {
 
             @Override
             protected String[] doInBackground(String... params) {
+
                 //carried over api and ID from last screen's click
                 Intent intent = getActivity().getIntent();
                 Bundle extras = intent.getExtras();
-                String API_KEY = extras.getString("API_KEY");
-                String Movie_ID = extras.getString("MOVIE_ID");
+
+                String API_KEY = intent.getStringExtra("API_KEY");
+                String Movie_ID = intent.getStringExtra("MOVIE_ID");
 
                 if (params.length == 0) {
 
@@ -390,16 +437,21 @@ public class MovieDetail extends ActionBarActivity {
             }
             @Override
             protected void onPostExecute(String[] result) {
+                Log.e("onPostExe", "is running???");
                 if (result != null){
                     mTrailerAdapter.clear();
                     mReviewAdapter.clear();
                     mReviewAdapter.notifyDataSetChanged();
-                    for(String trailerName: result) {
-                        mTrailerAdapter.add(trailerName);
-                    }
-                    for (int i = 0; i < reviewLength; i++){
-                        mReviewAdapter.add(reviews.get(i));
-                    }
+                    // checking for the initial dummy data
+                    //if(falseData = false) {
+                        for (String trailerName : result) {
+                            mTrailerAdapter.add(trailerName);
+                            Log.e("Trailer@name", trailerName);
+                        }
+                        for (int i = 0; i < reviewLength; i++) {
+                            mReviewAdapter.add(reviews.get(i));
+                            Log.e("Review@name", reviews.get(i));                        }
+                    //}
                 }
             }
         }
