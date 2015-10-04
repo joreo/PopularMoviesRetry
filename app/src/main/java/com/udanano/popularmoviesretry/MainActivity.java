@@ -38,7 +38,8 @@ public class MainActivity extends ActionBarActivity {
                         //R.id.poster_frag
                         // new MovieDetail.DetailFragment() --- details panel
                         // new PostersFragment() -- posters
-                        .add(R.id.container, new MovieDetail.DetailFragment())
+                        .add(R.id.poster_frag, new PostersFragment())
+                        .add(R.id.detail_frag, new MovieDetail.DetailFragment())
                         .commit();
             }
         }

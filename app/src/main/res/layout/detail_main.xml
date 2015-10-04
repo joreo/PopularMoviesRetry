@@ -8,17 +8,19 @@
     android:fillViewport="true"
     android:id="@+id/scrolly">
 
+
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-    android:background="#000000">
+        android:background="#000000">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/movie_detail_view"
-    android:background="#000000">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/movie_detail_view"
+        android:orientation="horizontal"
+        android:background="#000000">
 
     <ImageView
         android:layout_width="154dp"

@@ -10,16 +10,16 @@
 
     <fragment
         android:name="com.udanano.popularmoviesretry.PostersFragment"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_weight="1"
         android:layout_height="match_parent"
         android:id="@+id/poster_frag"
         tools:layout="@layout/fragment_main_left" />
 
-    <fragment
+    <FrameLayout
         android:name="com.udanano.popularmoviesretry.MovieDetail$DetailFragment"
         android:id="@+id/detail_frag"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="match_parent"
         tools:layout="@layout/detail_main" />

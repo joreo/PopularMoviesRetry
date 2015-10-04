@@ -38,7 +38,7 @@ public class PostersFragment extends Fragment {
     //****************************************************
     //*************API KEY GOES UNDER HERE****************
     //****************************************************
-    final public String API_KEY = "xxxxx";
+    final public String API_KEY = "";
 
     //an array of movie objects
     Movies[] movies = new Movies[20];
@@ -312,9 +312,9 @@ public class PostersFragment extends Fragment {
                             .putExtras(extras);
                     //if this is tablet view, take over that frame/fragment. dont eat my whole window, bro
 
-                    View v = getView().findViewById(R.id.two_panels);
+                    View v = getView().findViewById(R.id.detail_frag);
 
-                    if (v != null) {
+                    if (v == null) {
                         Log.e("v==","null");
                         startActivity(intent);
                     } else {
@@ -323,8 +323,16 @@ public class PostersFragment extends Fragment {
                         android.support.v4.app.FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
                         MovieDetail.DetailFragment nextFrag = new MovieDetail.DetailFragment();
                         nextFrag.setArguments(getActivity().getIntent().getExtras());
+                        //I'm starting to think this works, but my extras arent being passed over so it shows nothing but the default data
                         getActivity().getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.detail_frag, nextFrag).commit();
+
+//                        MovieDetail.DetailFragment fragment = new MovieDetail.DetailFragment();
+//                        fragment.setArguments(extras);
+//
+//                        getActivity().getSupportFragmentManager().beginTransaction()
+//                                .replace(R.id.detail_frag, fragment, "frag tag")
+//                                .commit();
 
                     }
 
