@@ -56,6 +56,7 @@ public class MovieDetail extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.detail_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -87,8 +88,15 @@ public class MovieDetail extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
+
             Intent intent = getActivity().getIntent();
             Bundle extras = intent.getExtras();
+            try {
+                Log.e("args?", this.getArguments().toString());
+                    intent.putExtras(this.getArguments());
+
+            } catch (Exception e) {}
+
 
 
             if (intent.hasExtra("MOVIE_POSTER")) {
