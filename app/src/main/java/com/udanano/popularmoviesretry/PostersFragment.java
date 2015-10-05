@@ -236,11 +236,6 @@ public class PostersFragment extends Fragment {
         }
         @Override
         protected void onPostExecute(String[] result) {
-            //just noting my concern that this only works when i code it here and not
-            //on create view
-
-            //mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
-            //moved below
 
             GridView gridView = (GridView) getView().findViewById(R.id.gridview_posters);
 

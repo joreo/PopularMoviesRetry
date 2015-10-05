@@ -1,6 +1,7 @@
 package com.udanano.popularmoviesretry;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -21,6 +22,7 @@ public class MainActivity extends ActionBarActivity {
         // is this layout large?
         if(v == null){
             //nope
+
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         //R.id.poster_frag
@@ -28,6 +30,7 @@ public class MainActivity extends ActionBarActivity {
                         // new PostersFragment() -- posters
                         .add(R.id.container, new PostersFragment())
                         .commit();
+
             }
 
         } else {
@@ -50,6 +53,11 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         menu.clear();
+
+        //i have no idea why this works here and not at onCreate....
+        if(getResources().getBoolean(R.bool.portrait_only)){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
         return true;
     }
 
