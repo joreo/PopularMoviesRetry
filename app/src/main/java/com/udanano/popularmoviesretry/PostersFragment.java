@@ -171,17 +171,29 @@ public class PostersFragment extends Fragment {
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-
+            String searchType ="popularity.desc";
 
 
             // Will contain the raw JSON response as a string.
             String postersJsonStr = null;
             try {
 
+                SharedPreferences sharedPrefs =
+                        PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String unitType = sharedPrefs.getString(
+                        getString(R.string.pref_sort_key),
+                        getString(R.string.pref_rating));
+                if (unitType.equals("Rating")){
+                    searchType = "vote_average.desc";
+                } else {
+                    searchType = "popularity.desc";
+                }
+
+                Log.e("Favorite test", unitType);
 
 
-                final String TMDB_BASE_URL =
-                        "http://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=" + API_KEY;
+                 final String TMDB_BASE_URL =
+                        "http://api.themoviedb.org/3/discover/movie?sort_by=" + searchType + "&api_key=" + API_KEY;
 
                 URL url = new URL(TMDB_BASE_URL.toString());
 
@@ -246,6 +258,8 @@ public class PostersFragment extends Fragment {
                     getString(R.string.pref_sort_key),
                     getString(R.string.pref_rating));
 
+            //put a try/catch here pls
+            try {
             Log.e("Favorite test", unitType);
             if (unitType.equals("Rating")){
                 Arrays.sort(movies, Movies.MovieRatingComparator);
@@ -286,6 +300,10 @@ public class PostersFragment extends Fragment {
                 mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
 
             }
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
+        }
 
             gridView.setAdapter(mPosterAdapter);
 

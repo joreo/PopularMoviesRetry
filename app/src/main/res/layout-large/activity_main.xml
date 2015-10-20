@@ -9,7 +9,7 @@
     android:screenOrientation="landscape">
 
 
-    <fragment
+    <FrameLayout
         android:name="com.udanano.popularmoviesretry.PostersFragment"
         android:layout_width="match_parent"
         android:layout_weight="1"
