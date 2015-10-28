@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PostersFragment extends Fragment {
@@ -41,7 +40,9 @@ public class PostersFragment extends Fragment {
     final public String API_KEY = "xxxxx";
 
     //an array of movie objects
-    Movies[] movies = new Movies[20];
+    //Movies[] movies = new Movies[20];
+    //gotta make movies into an arraylist
+    ArrayList<Movies> movies = new ArrayList<Movies>();
 
     public PostersFragment() {
     }
@@ -49,6 +50,7 @@ public class PostersFragment extends Fragment {
     @Override
     public void onResume(){
         super.onResume();
+        movies.clear();
         updateMovies();
     }
 
@@ -58,7 +60,13 @@ public class PostersFragment extends Fragment {
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
         Log.v("Steps", "Called updateMovies() onCreate");
-        updateMovies();
+        //parcelable stuff
+        if(savedInstanceState == null || !savedInstanceState.containsKey("flicks")){
+            updateMovies();
+        } else {
+            movies.clear();
+            movies = savedInstanceState.getParcelableArrayList("flicks");
+        }
     }
 
     @Override
@@ -102,6 +110,12 @@ public class PostersFragment extends Fragment {
 
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("flicks", movies);
+        super.onSaveInstanceState(outState);
+    }
+
     public class FetchMovieInfo extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchMovieInfo.class.getSimpleName();
@@ -124,10 +138,11 @@ public class PostersFragment extends Fragment {
             JSONArray moviesArray = moviesJson.getJSONArray(TMB_RESULTS);
 
             int numMovies = moviesArray.length();
+            Log.e("movies@JSON", Integer.toString(moviesArray.length()));
             String[] resultStrs = new String[numMovies];
 
 
-
+            movies.clear();
             for (int i = 0; i < moviesArray.length(); i++) {
 
                 String poster;
@@ -150,7 +165,8 @@ public class PostersFragment extends Fragment {
 
                 resultStrs[i] = poster;
                 //adding the movie info into our movie objects.
-                movies[i] = new Movies (poster, title, average, overview, release_date, popularity, id);
+                //movies[i] = new Movies (poster, title, average, overview, release_date, popularity, id);
+                movies.add(new Movies (poster, title, average, overview, release_date, popularity, id));
 
             }
 
@@ -260,10 +276,11 @@ public class PostersFragment extends Fragment {
 
             //put a try/catch here pls
             try {
-            Log.e("Favorite test", unitType);
+                Log.e("Favorite test", unitType);
+                Log.e("movies@sort", Integer.toString(movies.size()));
             if (unitType.equals("Rating")){
-                Arrays.sort(movies, Movies.MovieRatingComparator);
-                mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+                //Arrays.sort(movies, Movies.MovieRatingComparator);
+                mPosterAdapter = new ImageAdapter(getActivity(), movies);
             } else if (unitType.equals("Favorites")) {
                     //should be Favorites, changed temporarily
 
@@ -290,16 +307,17 @@ public class PostersFragment extends Fragment {
                     mPosterAdapter = new ImageAdapter(getActivity(), favMovies);
                 }else{
                     Toast.makeText(getActivity(), "Favorites are empty, showing Popular movies", Toast.LENGTH_LONG).show();
-                    Arrays.sort(movies, Movies.MoviePopularityComparator);
-                    mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+                    //Arrays.sort(movies, Movies.MoviePopularityComparator);
+                    mPosterAdapter = new ImageAdapter(getActivity(), movies);
                 }
                 DOP.close();
             } else {
                 //sort by pop
-                Arrays.sort(movies, Movies.MoviePopularityComparator);
-                mPosterAdapter = new ImageAdapter(getActivity(), Arrays.asList(movies));
+                //Arrays.sort(movies, Movies.MoviePopularityComparator);
+                mPosterAdapter = new ImageAdapter(getActivity(), movies);
 
             }
+
         } catch (Exception e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();

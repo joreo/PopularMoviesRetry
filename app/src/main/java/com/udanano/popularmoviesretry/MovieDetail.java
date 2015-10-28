@@ -84,6 +84,9 @@ public class MovieDetail extends ActionBarActivity {
         //      can't get my variables to stay alive after the if
         //      i'm bad at fragments/frames. learn2fragmentpls
         //      click a thing - watch it take over the whole screen. good job, dumbass.
+        //10/28 took time off for a wedding and work projects
+        //lets get parcelable to work pls
+
     }
 
     public static class DetailFragment extends Fragment {
