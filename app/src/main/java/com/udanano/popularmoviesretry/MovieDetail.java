@@ -51,7 +51,7 @@ public class MovieDetail extends ActionBarActivity {
 
     //also used in some of the other functions
     //public static String movie_id ;
-    //public static String API_KEY = "fcece545ee341e673a9344a531f80064";
+    //public static String API_KEY = "xxxxx";
 
 
     @Override
